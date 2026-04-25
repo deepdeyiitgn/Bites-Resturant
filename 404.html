@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bites — Cakes, Fast Food & More | Dharmanagar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<style>
+  :root {
+    --bg:        #0C0905;
+    --bg2:       #150F08;
+    --bg3:       #1C1410;
+    --gold:      #D4960A;
+    --gold-lt:   #F2BC3A;
+    --gold-glow: rgba(212,150,10,0.25);
+    --amber:     #C47A2B;
+    --white:     #F7F2EA;
+    --muted:     #A8956C;
+    --card:      #1E1710;
+    --border:    rgba(212,150,10,0.18);
+    --radius:    14px;
+    --nav-h:     72px;
+    --transition: 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--white);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ─────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.35;
+  }
+
+  /* ── SCROLLBAR ─────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+  /* ── STICKY NAV ────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    height: var(--nav-h);
+    display: flex; align-items: center;
+    padding: 0 clamp(1rem, 5vw, 3.5rem);
+    background: rgba(12,9,5,0.82);
+    backdrop-filter: blur(18px) saturate(1.4);
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition), box-shadow var(--transition);
+  }
+  nav.scrolled {
+    background: rgba(12,9,5,0.97);
+    box-shadow: 0 4px 40px rgba(0,0,0,0.6);
+  }
+
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 1.55rem;
+    color: var(--gold-lt);
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+  }
+  .nav-logo .logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--amber) 100%);
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-size: 1.2rem;
+    box-shadow: 0 0 18px var(--gold-glow);
+  }
+
+  .nav-links {
+    display: flex; gap: 2rem; list-style: none;
+    margin: 0 auto;
+  }
+  .nav-links a {
+    color: var(--muted); text-decoration: none;
+    font-size: 0.88rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    transition: color var(--transition);
+    position: relative;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+    height: 1.5px; background: var(--gold);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform var(--transition);
+  }
+  .nav-links a:hover { color: var(--gold-lt); }
+  .nav-links a:hover::after { transform: scaleX(1); }
+
+  .btn-call {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--amber) 100%);
+    color: #0C0905; font-weight: 700; font-size: 0.88rem;
+    border: none; border-radius: 50px; cursor: pointer;
+    text-decoration: none; letter-spacing: 0.04em;
+    box-shadow: 0 0 22px var(--gold-glow);
+    transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+    flex-shrink: 0;
+  }
+  .btn-call:hover {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 6px 32px rgba(212,150,10,0.5);
+    filter: brightness(1.1);
+  }
+
+  .hamburger {
+    display: none; flex-direction: column; gap: 5px;
+    cursor: pointer; background: none; border: none; padding: 4px;
+  }
+  .hamburger span {
+    display: block; width: 24px; height: 2px;
+    background: var(--gold); border-radius: 2px;
+    transition: transform var(--transition), opacity var(--transition);
+  }
+
+  /* ── HERO ──────────────────────────────────────────── */
+  #hero {
+    min-height: 100svh;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    padding: calc(var(--nav-h) + 3rem) clamp(1rem, 5vw, 3.5rem) 5rem;
+    text-align: center;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 20%, rgba(212,150,10,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 80% at 20% 80%, rgba(196,122,43,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 60%, rgba(212,150,10,0.07) 0%, transparent 60%),
+      linear-gradient(180deg, #0C0905 0%, #150F08 50%, #0C0905 100%);
+  }
+
+  /* floating orbs */
+  .orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(60px); pointer-events: none;
+    animation: float 8s ease-in-out infinite;
+  }
+  .orb-1 { width: 400px; height: 400px; background: rgba(212,150,10,0.07); top: -100px; left: -100px; animation-delay: 0s; }
+  .orb-2 { width: 300px; height: 300px; background: rgba(196,122,43,0.06); bottom: -80px; right: -80px; animation-delay: 3s; }
+  .orb-3 { width: 200px; height: 200px; background: rgba(212,150,10,0.05); top: 40%; left: 60%; animation-delay: 5s; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-30px) scale(1.05); }
+  }
+
+  .hero-content { position: relative; z-index: 2; max-width: 740px; }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(212,150,10,0.12);
+    border: 1px solid var(--border);
+    color: var(--gold-lt); font-size: 0.78rem; font-weight: 700;
+    padding: 7px 18px; border-radius: 50px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 1.6rem;
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+  }
+  .hero-badge .star { color: #FFD700; font-size: 0.9rem; }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 8vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.06;
+    letter-spacing: -0.01em;
+    color: var(--white);
+    margin-bottom: 1.3rem;
+    animation: fadeInUp 0.6s 0.15s ease forwards;
+    opacity: 0;
+  }
+  .hero-title .gold { color: var(--gold-lt); display: block; }
+
+  .hero-sub {
+    font-size: clamp(1rem, 2.5vw, 1.18rem);
+    color: var(--muted); font-weight: 400;
+    max-width: 520px; margin: 0 auto 2.4rem;
+    animation: fadeInUp 0.6s 0.3s ease forwards;
+    opacity: 0;
+  }
+
+  .hero-ctas {
+    display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+    animation: fadeInUp 0.6s 0.45s ease forwards;
+    opacity: 0;
+  }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--amber) 100%);
+    color: #0C0905; font-weight: 800; font-size: 0.95rem;
+    border: none; border-radius: 50px; cursor: pointer; text-decoration: none;
+    box-shadow: 0 6px 30px rgba(212,150,10,0.4);
+    transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+    letter-spacing: 0.03em;
+  }
+  .btn-primary:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 12px 40px rgba(212,150,10,0.55);
+    filter: brightness(1.1);
+  }
+
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 14px 32px;
+    background: transparent;
+    color: var(--gold-lt); font-weight: 700; font-size: 0.95rem;
+    border: 1.5px solid var(--border);
+    border-radius: 50px; cursor: pointer; text-decoration: none;
+    transition: background var(--transition), border-color var(--transition), transform var(--transition);
+    letter-spacing: 0.03em;
+  }
+  .btn-secondary:hover {
+    background: rgba(212,150,10,0.1);
+    border-color: var(--gold);
+    transform: translateY(-3px);
+  }
+
+  .hero-scroll {
+    position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    color: var(--muted); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+    animation: fadeIn 1s 1s ease forwards; opacity: 0;
+  }
+  .hero-scroll .arrow {
+    width: 22px; height: 22px;
+    border-right: 1.5px solid var(--gold);
+    border-bottom: 1.5px solid var(--gold);
+    transform: rotate(45deg);
+    animation: bounce 1.8s infinite;
+  }
+  @keyframes bounce { 0%,100% { transform: rotate(45deg) translateY(0); } 50% { transform: rotate(45deg) translateY(6px); } }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ── SECTION SHARED ────────────────────────────────── */
+  section { padding: clamp(4rem, 10vw, 7rem) clamp(1rem, 5vw, 3.5rem); }
+
+  .section-tag {
+    display: inline-flex; align-items: center; gap: 10px;
+    color: var(--gold); font-size: 0.78rem; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .section-tag::before, .section-tag::after {
+    content: ''; display: block;
+    width: 28px; height: 1px; background: var(--gold); opacity: 0.6;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--white);
+    margin-bottom: 1rem;
+  }
+  .section-title span { color: var(--gold-lt); }
+
+  .section-desc {
+    color: var(--muted); font-size: 1.02rem;
+    max-width: 560px; line-height: 1.75;
+  }
+
+  /* ── SERVICES / MENU HIGHLIGHTS ────────────────────── */
+  #services { background: var(--bg2); }
+
+  .services-header { text-align: center; margin-bottom: 3.5rem; }
+  .services-header .section-desc { margin: 0 auto; }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.6rem;
+    max-width: 1200px; margin: 0 auto;
+  }
+
+  .service-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem 1.8rem;
+    position: relative; overflow: hidden;
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    cursor: default;
+  }
+  .service-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(212,150,10,0.08) 0%, transparent 70%);
+    opacity: 0; transition: opacity var(--transition);
+  }
+  .service-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px var(--gold), inset 0 0 30px rgba(212,150,10,0.04);
+    border-color: rgba(212,150,10,0.5);
+  }
+  .service-card:hover::before { opacity: 1; }
+
+  .card-icon {
+    width: 58px; height: 58px;
+    background: linear-gradient(135deg, rgba(212,150,10,0.2) 0%, rgba(196,122,43,0.1) 100%);
+    border: 1px solid rgba(212,150,10,0.3);
+    border-radius: 14px;
+    display: grid; place-items: center;
+    font-size: 1.6rem;
+    margin-bottom: 1.3rem;
+    transition: background var(--transition), transform var(--transition);
+  }
+  .service-card:hover .card-icon {
+    background: linear-gradient(135deg, rgba(212,150,10,0.35) 0%, rgba(196,122,43,0.2) 100%);
+    transform: scale(1.08) rotate(-4deg);
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; font-weight: 700;
+    color: var(--white); margin-bottom: 0.6rem;
+  }
+  .card-desc { color: var(--muted); font-size: 0.92rem; line-height: 1.7; }
+
+  .card-items {
+    display: flex; flex-wrap: wrap; gap: 7px; margin-top: 1.1rem;
+  }
+  .chip {
+    background: rgba(212,150,10,0.1);
+    border: 1px solid rgba(212,150,10,0.2);
+    color: var(--gold-lt);
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em;
+    padding: 4px 11px; border-radius: 50px;
+  }
+
+  /* ── ABOUT ─────────────────────────────────────────── */
+  #about {
+    background: var(--bg);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+    max-width: 1200px; margin: 0 auto;
+    padding-left: clamp(1rem, 5vw, 3.5rem);
+    padding-right: clamp(1rem, 5vw, 3.5rem);
+  }
+
+  .about-visual {
+    position: relative;
+  }
+  .about-glow-box {
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--bg3) 0%, var(--bg2) 100%);
+    border: 1px solid var(--border);
+    padding: 2.5rem;
+    position: relative; overflow: hidden;
+  }
+  .about-glow-box::after {
+    content: '';
+    position: absolute; top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(212,150,10,0.2) 0%, transparent 70%);
+  }
+
+  .stat-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  .stat-box {
+    text-align: center;
+    background: rgba(212,150,10,0.07);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.2rem 0.8rem;
+  }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; font-weight: 900;
+    color: var(--gold-lt);
+    display: block; line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label { color: var(--muted); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; }
+
+  .big-emoji { font-size: 5rem; text-align: center; display: block; margin-bottom: 0.5rem; }
+
+  .about-text .section-tag { margin-bottom: 0.8rem; }
+  .about-para { color: var(--muted); font-size: 0.98rem; line-height: 1.8; margin-bottom: 1.2rem; }
+
+  /* ── TESTIMONIALS ──────────────────────────────────── */
+  .testimonials { margin-top: 3rem; display: flex; flex-direction: column; gap: 1.2rem; }
+
+  .testimonial {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.6rem;
+    position: relative;
+    transition: border-color var(--transition);
+  }
+  .testimonial:hover { border-color: rgba(212,150,10,0.4); }
+
+  .testimonial::before {
+    content: '"';
+    position: absolute; top: -10px; left: 16px;
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem; color: var(--gold);
+    line-height: 1; opacity: 0.3;
+  }
+
+  .testimonial-text { color: var(--white); font-size: 0.93rem; line-height: 1.7; margin-bottom: 1rem; }
+
+  .testimonial-author {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .author-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--amber) 100%);
+    display: grid; place-items: center;
+    font-weight: 800; font-size: 0.85rem; color: #0C0905;
+    flex-shrink: 0;
+  }
+  .author-name { font-weight: 700; font-size: 0.88rem; color: var(--white); }
+  .author-stars { color: #FFD700; font-size: 0.75rem; }
+
+  /* ── ORDER CTA BANNER ──────────────────────────────── */
+  #order-cta {
+    background: linear-gradient(135deg, #1A1205 0%, #201608 50%, #1A1205 100%);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  #order-cta::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(212,150,10,0.1) 0%, transparent 70%);
+  }
+  #order-cta .inner { position: relative; z-index: 2; }
+  #order-cta .section-tag { justify-content: center; }
+  #order-cta .section-title { margin-bottom: 0.6rem; }
+  #order-cta .section-desc { margin: 0 auto 2rem; }
+  .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  .btn-whatsapp {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 14px 30px;
+    background: #25D366;
+    color: #fff; font-weight: 700; font-size: 0.95rem;
+    border-radius: 50px; text-decoration: none;
+    transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+    box-shadow: 0 4px 20px rgba(37,211,102,0.3);
+  }
+  .btn-whatsapp:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(37,211,102,0.5);
+    filter: brightness(1.08);
+  }
+
+  /* ── FOOTER ────────────────────────────────────────── */
+  footer {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: clamp(3rem, 8vw, 5rem) clamp(1rem, 5vw, 3.5rem) 2rem;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 3rem;
+    max-width: 1100px; margin: 0 auto 3rem;
+  }
+
+  .footer-brand .nav-logo { margin-bottom: 1rem; }
+  .footer-brand p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; max-width: 280px; }
+
+  .footer-social {
+    display: flex; gap: 10px; margin-top: 1.4rem;
+  }
+  .social-btn {
+    width: 38px; height: 38px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: grid; place-items: center;
+    color: var(--muted); font-size: 0.9rem;
+    text-decoration: none;
+    transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition);
+  }
+  .social-btn:hover {
+    background: rgba(212,150,10,0.15);
+    color: var(--gold-lt);
+    border-color: rgba(212,150,10,0.4);
+    transform: translateY(-3px);
+  }
+
+  .footer-col h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; font-weight: 700;
+    color: var(--white); margin-bottom: 1.2rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .footer-info { list-style: none; }
+  .footer-info li {
+    display: flex; align-items: flex-start; gap: 10px;
+    color: var(--muted); font-size: 0.88rem;
+    margin-bottom: 0.85rem;
+  }
+  .footer-info li i { color: var(--gold); margin-top: 2px; flex-shrink: 0; width: 14px; }
+  .footer-info a { color: var(--muted); text-decoration: none; transition: color var(--transition); }
+  .footer-info a:hover { color: var(--gold-lt); }
+
+  .hours-list { list-style: none; }
+  .hours-list li {
+    display: flex; justify-content: space-between;
+    color: var(--muted); font-size: 0.86rem; margin-bottom: 0.65rem;
+    padding-bottom: 0.65rem; border-bottom: 1px solid rgba(212,150,10,0.07);
+  }
+  .hours-list li:last-child { border-bottom: none; }
+  .hours-list .day { color: var(--white); font-weight: 600; }
+  .open-badge {
+    display: inline-block; padding: 2px 10px;
+    background: rgba(37,211,102,0.15); color: #4ade80;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em;
+    border-radius: 50px; border: 1px solid rgba(37,211,102,0.3);
+  }
+
+  .map-container {
+    border-radius: var(--radius); overflow: hidden;
+    border: 1px solid var(--border);
+    margin-top: 0;
+  }
+  .map-link-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 18px;
+    background: rgba(212,150,10,0.1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--gold-lt); font-size: 0.85rem; font-weight: 600;
+    text-decoration: none;
+    transition: background var(--transition), border-color var(--transition), transform var(--transition);
+    margin-top: 1rem;
+    justify-content: center;
+  }
+  .map-link-btn:hover {
+    background: rgba(212,150,10,0.2);
+    border-color: rgba(212,150,10,0.5);
+    transform: translateY(-2px);
+  }
+
+  .footer-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 1rem;
+    max-width: 1100px; margin: 0 auto;
+  }
+  .footer-bottom p { color: var(--muted); font-size: 0.8rem; }
+  .footer-bottom .gold-text { color: var(--gold); }
+
+  /* ── MOBILE NAV ────────────────────────────────────── */
+  .mobile-menu {
+    display: none;
+    position: fixed; top: var(--nav-h); left: 0; right: 0;
+    background: rgba(12,9,5,0.98); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem clamp(1rem, 5vw, 3.5rem) 2rem;
+    z-index: 999;
+    flex-direction: column; gap: 1rem;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    color: var(--muted); text-decoration: none; font-size: 1rem; font-weight: 600;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    transition: color var(--transition);
+  }
+  .mobile-menu a:hover { color: var(--gold-lt); }
+  .mobile-menu .btn-call { margin-top: 0.5rem; justify-content: center; }
+
+  /* ── SCROLL REVEAL ─────────────────────────────────── */
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* ── RESPONSIVE ────────────────────────────────────── */
+  @media (max-width: 900px) {
+    #about {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .footer-brand { grid-column: 1 / -1; }
+  }
+
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .btn-call.desktop-only { display: none; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .stat-row { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ── DIVIDER ───────────────────────────────────────── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--gold) 50%, transparent 100%);
+    opacity: 0.25; margin: 0;
+  }
+
+  /* ── STARS ─────────────────────────────────────────── */
+  .stars { color: #FFD700; font-size: 1rem; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ NAV ════════════════════════════ -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <span class="logo-icon">🍰</span>
+    Bites
+  </a>
+  <ul class="nav-links">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#services">Menu</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#order-cta">Order</a></li>
+    <li><a href="#footer">Contact</a></li>
+  </ul>
+  <a href="tel:08553268033" class="btn-call desktop-only">
+    <i class="fas fa-phone"></i> Call Now
+  </a>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#hero" onclick="closeMobile()">Home</a>
+  <a href="#services" onclick="closeMobile()">Menu</a>
+  <a href="#about" onclick="closeMobile()">About</a>
+  <a href="#order-cta" onclick="closeMobile()">Order</a>
+  <a href="#footer" onclick="closeMobile()">Contact</a>
+  <a href="tel:08553268033" class="btn-call">
+    <i class="fas fa-phone"></i> Call: 085532 68033
+  </a>
+</div>
+
+<!-- ═══════════════════ HERO ═══════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="star">★★★★</span> 4-Star Rated on Google Maps
+    </div>
+    <h1 class="hero-title">
+      Every Bite
+      <span class="gold">Tells a Story</span>
+    </h1>
+    <p class="hero-sub">
+      From freshly baked cakes & pastries to sizzling hotdogs and crispy chicken pizza — your favourite flavours, all in one place in Dharmanagar.
+    </p>
+    <div class="hero-ctas">
+      <a href="https://wa.me/918553268033?text=Hi%20Bites!%20I%27d%20like%20to%20place%20an%20order." target="_blank" class="btn-primary">
+        <i class="fab fa-whatsapp"></i> Order on WhatsApp
+      </a>
+      <a href="tel:08553268033" class="btn-secondary">
+        <i class="fas fa-phone"></i> Call to Order
+      </a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>Explore</span>
+    <div class="arrow"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════ SERVICES ══════════════════════ -->
+<section id="services">
+  <div class="services-header reveal">
+    <div class="section-tag">Our Specialities</div>
+    <h2 class="section-title">What We <span>Serve</span></h2>
+    <p class="section-desc">Handcrafted with love — from the warmth of our bakery to the crunch of our street food, every item is made fresh daily.</p>
+  </div>
+
+  <div class="services-grid">
+
+    <div class="service-card reveal">
+      <div class="card-icon">🎂</div>
+      <div class="card-title">Cakes & Pastries</div>
+      <p class="card-desc">Our signature cakes are baked fresh every morning — rich chocolate truffle, fruity cream, exotic blueberry, and custom celebration cakes for every occasion.</p>
+      <div class="card-items">
+        <span class="chip">Chocolate Truffle</span>
+        <span class="chip">Cream Cakes</span>
+        <span class="chip">Custom Orders</span>
+        <span class="chip">Pastries</span>
+      </div>
+    </div>
+
+    <div class="service-card reveal" style="transition-delay:0.12s">
+      <div class="card-icon">🌭</div>
+      <div class="card-title">Hotdogs & Snacks</div>
+      <p class="card-desc">Loaded, saucy, and irresistible — our hotdogs come piled high with fresh toppings and that golden drizzle that keeps you coming back for more.</p>
+      <div class="card-items">
+        <span class="chip">Classic Hotdog</span>
+        <span class="chip">Mayo Drizzle</span>
+        <span class="chip">Veg Options</span>
+        <span class="chip">Combos</span>
+      </div>
+    </div>
+
+    <div class="service-card reveal" style="transition-delay:0.24s">
+      <div class="card-icon">🍕</div>
+      <div class="card-title">Pizza & Fast Food</div>
+      <p class="card-desc">Chicken Plate Pizza, loaded with toppings and that signature creamy drizzle — plus a range of veg items and fast food favourites for every taste.</p>
+      <div class="card-items">
+        <span class="chip">Chicken Pizza</span>
+        <span class="chip">Veg Items</span>
+        <span class="chip">Plate Pizzas</span>
+        <span class="chip">Fast Food</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════ ABOUT ══════════════════════════ -->
+<section id="about" style="padding-top: clamp(4rem,10vw,7rem); padding-bottom: clamp(4rem,10vw,7rem);">
+
+  <div class="about-visual reveal">
+    <div class="about-glow-box">
+      <span class="big-emoji">🍰</span>
+      <h3 style="font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--white); text-align:center; margin-bottom:0.4rem;">
+        Dharmanagar's Favourite Spot
+      </h3>
+      <p style="color:var(--muted); font-size:0.9rem; text-align:center; line-height:1.7;">
+        Cakes · Fast Food · Pastries · Hotdogs · Pizza
+      </p>
+      <div class="stat-row">
+        <div class="stat-box">
+          <span class="stat-num">★4</span>
+          <span class="stat-label">Google Rating</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num">100%</span>
+          <span class="stat-label">Fresh Daily</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num">6+</span>
+          <span class="stat-label">Menu Items</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num">😍</span>
+          <span class="stat-label">Happy Customers</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about-text reveal" style="transition-delay:0.15s;">
+    <div class="section-tag">Our Story</div>
+    <h2 class="section-title">A Local Favourite<br><span>Born from Passion</span></h2>
+
+    <p class="about-para">
+      Bites started with a simple dream — to bring Dharmanagar something truly delicious. We wanted a place where a birthday cake could be ordered with a smile, where a quick hotdog hit the spot, and where a slice of pizza felt like home.
+    </p>
+    <p class="about-para">
+      Today, we're proud to be one of the most loved local eateries in town. Every product leaves our kitchen with the same care and flavour that made our first customers fall in love with us.
+    </p>
+
+    <div class="testimonials">
+      <div class="testimonial">
+        <p class="testimonial-text">The chocolate truffle cake was absolutely divine! Ordered for my daughter's birthday and everyone was impressed. Will definitely order again!</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">P</div>
+          <div>
+            <div class="author-name">Priya Sharma</div>
+            <div class="author-stars">★★★★★ &nbsp;<span style="color:var(--muted);font-size:0.75rem;">Google Review</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial">
+        <p class="testimonial-text">The chicken plate pizza and hotdog combo is my go-to evening snack. Fresh, tasty, and very affordable. Bites is the best in Dharmanagar!</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">R</div>
+          <div>
+            <div class="author-name">Rahul Das</div>
+            <div class="author-stars">★★★★☆ &nbsp;<span style="color:var(--muted);font-size:0.75rem;">Google Review</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════ CTA BANNER ════════════════════ -->
+<section id="order-cta">
+  <div class="inner">
+    <div class="section-tag" style="justify-content:center;">Ready to Eat?</div>
+    <h2 class="section-title reveal">Order Now — It's Just<br><span>One Message Away</span></h2>
+    <p class="section-desc reveal" style="margin: 0 auto 2rem;">
+      WhatsApp us your order or give us a call. We're here to serve you the best food in Dharmanagar!
+    </p>
+    <div class="cta-buttons reveal">
+      <a href="https://wa.me/918553268033?text=Hi%20Bites!%20I%27d%20like%20to%20place%20an%20order." target="_blank" class="btn-whatsapp">
+        <i class="fab fa-whatsapp"></i> WhatsApp: +91 85532 68033
+      </a>
+      <a href="tel:08553268033" class="btn-primary">
+        <i class="fas fa-phone"></i> Call: 085532 68033
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════ FOOTER ════════════════════════ -->
+<footer id="footer">
+  <div class="footer-grid">
+
+    <div class="footer-brand">
+      <a href="#" class="nav-logo" style="display:inline-flex;">
+        <span class="logo-icon">🍰</span>
+        Bites
+      </a>
+      <p>Your neighbourhood bakery, fast food & snack hub in Dharmanagar. Made fresh. Served with love. Rated 4 stars on Google.</p>
+      <div class="footer-social">
+        <a href="https://wa.me/918553268033" class="social-btn" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="tel:08553268033" class="social-btn" title="Call"><i class="fas fa-phone"></i></a>
+        <a href="https://maps.app.goo.gl/ZeX92p2DpoWsoUeU8?g_st=ac" class="social-btn" target="_blank" title="Google Maps"><i class="fab fa-google"></i></a>
+        <a href="#" class="social-btn" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="social-btn" title="Instagram"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h4>Contact Us</h4>
+      <ul class="footer-info">
+        <li>
+          <i class="fas fa-map-marker-alt"></i>
+          <span>Dharmanagar, Tripura, India</span>
+        </li>
+        <li>
+          <i class="fas fa-phone"></i>
+          <a href="tel:08553268033">085532 68033</a>
+        </li>
+        <li>
+          <i class="fab fa-whatsapp"></i>
+          <a href="https://wa.me/918553268033" target="_blank">+91 85532 68033</a>
+        </li>
+        <li>
+          <i class="fab fa-google"></i>
+          <a href="https://maps.app.goo.gl/ZeX92p2DpoWsoUeU8?g_st=ac" target="_blank">View on Google Maps</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Opening Hours</h4>
+      <ul class="hours-list">
+        <li>
+          <span class="day">Mon – Fri</span>
+          <span>9:00 AM – 9:00 PM</span>
+        </li>
+        <li>
+          <span class="day">Saturday</span>
+          <span>9:00 AM – 10:00 PM</span>
+        </li>
+        <li>
+          <span class="day">Sunday</span>
+          <span>10:00 AM – 8:00 PM</span>
+        </li>
+      </ul>
+      <div style="margin-top:1rem; text-align:center;">
+        <span class="open-badge">● Open Now</span>
+      </div>
+      <a href="https://maps.app.goo.gl/ZeX92p2DpoWsoUeU8?g_st=ac" class="map-link-btn" target="_blank">
+        <i class="fas fa-map-marked-alt"></i> Get Directions
+      </a>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <p>© 2025 <span class="gold-text">Bites</span> — Dharmanagar. All rights reserved.</p>
+    <p style="color:var(--muted); font-size:0.76rem;">
+      <span class="stars">★★★★</span> 4-Star on Google Maps
+    </p>
+  </div>
+</footer>
+
+<script>
+  // Sticky Nav
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Hamburger
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+  hamburger.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open');
+  });
+  function closeMobile() {
+    mobileMenu.classList.remove('open');
+  }
+
+  // Scroll Reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+
+  // Smooth close nav on anchor click (desktop)
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      mobileMenu.classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>
